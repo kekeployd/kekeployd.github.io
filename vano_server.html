@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин ролей — Вано сервер</title>
+    <style>
+        :root {
+            --bg-color: #0f1012;
+            --card-bg: #1a1b1e;
+            --card-hover-bg: #232428;
+            --text-color: #f2f3f5;
+            --text-muted: #949ba4;
+            --discord-blue: #5865f2;
+            --discord-green: #23a55a;
+            --vano-gold: linear-gradient(135deg, #ffe066, #f59f00, #f76707);
+            --danger-red: #da373c;
+            --accent-yellow: rgba(255, 224, 102, 0.4);
+            --da-orange: #ff7f11;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 224, 102, 0.8), rgba(245, 159, 0, 0.6));
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s linear, opacity 0.6s ease-out;
+            opacity: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .title-text {
+            background: linear-gradient(90deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-gif {
+            height: 3.5rem;
+            width: auto;
+            border-radius: 8px;
+            vertical-align: middle;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .roles-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 50px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .role-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+        }
+
+        .role-card:hover {
+            transform: translateY(-8px);
+            background-color: var(--card-hover-bg);
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.05);
+            border-color: rgba(255, 215, 0, 0.15);
+        }
+
+        .role-card.selected {
+            border-color: var(--discord-blue);
+            background-color: #202225;
+            box-shadow: 0 15px 35px rgba(88, 101, 242, 0.15);
+        }
+
+        .role-card.legendary {
+            border: 1px solid transparent;
+            background-image: linear-gradient(var(--card-bg), var(--card-bg)), var(--vano-gold);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            box-shadow: 0 10px 30px rgba(245, 159, 0, 0.1);
+        }
+
+        .role-card.legendary:hover {
+            background-image: linear-gradient(var(--card-hover-bg), var(--card-hover-bg)), var(--vano-gold);
+            box-shadow: 0 15px 40px rgba(245, 159, 0, 0.25);
+        }
+
+        .role-card.legendary.selected {
+            box-shadow: 0 15px 40px rgba(255, 224, 102, 0.4);
+            background-image: linear-gradient(#202225, #202225), var(--vano-gold);
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--vano-gold);
+            color: #000;
+            padding: 5px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(245, 159, 0, 0.3);
+        }
+
+        .role-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+
+        .role-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .role-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .price span {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
+
+        .select-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+        }
+
+        .role-card.selected .select-indicator {
+            border-color: var(--discord-blue);
+            background-color: var(--discord-blue);
+            transform: scale(1.1);
+        }
+
+        .role-card.selected .select-indicator::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .checkout-panel {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: none;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .checkout-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 15px;
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            letter-spacing: 0.8px;
+        }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-radius: 8px;
+            border: 1.5px solid rgba(255, 255, 255, 0.05);
+            background-color: #111214;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .payment-option.active {
+            border-color: var(--da-orange);
+            background-color: rgba(255, 127, 17, 0.05);
+        }
+
+        .payment-option.active:hover {
+            background-color: rgba(255, 127, 17, 0.08);
+        }
+
+        .payment-option.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .payment-option-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .payment-option-icon {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .payment-option-name {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .payment-option.disabled .payment-option-name {
+            text-decoration: line-through;
+        }
+
+        .payment-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .payment-badge.active {
+            background-color: rgba(255, 127, 17, 0.15);
+            color: var(--da-orange);
+        }
+
+        .payment-badge.disabled {
+            background-color: rgba(218, 55, 60, 0.15);
+            color: var(--danger-red);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: var(--discord-green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(35, 165, 90, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:hover {
+            background-color: #1a7f43;
+            box-shadow: 0 6px 20px rgba(35, 165, 90, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-gif {
+            height: 24px;
+            width: auto;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: #1a1b1e;
+            border-radius: 16px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--danger-red);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-gif {
+            width: 100%;
+            max-width: 280px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-text {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #f23f43;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .close-btn {
+            background-color: #4e5058;
+            color: #fff;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background-color: #6d6f78;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>
+            <span class="title-text">Магазин ролей «Вано сервер»</span>
+            <img src="https://noikcloud.xyz/8blaudG" alt="gif" class="header-gif">
+        </h1>
+        <p>Выберите желаемую роль, чтобы перейти к оформлению</p>
+    </header>
+
+    <div class="roles-container">
+        <div class="role-card legendary" onclick="selectRole(this, 'Вано', '99 999 999 ₽')">
+            <span class="badge">Абсолют</span>
+            <div>
+                <div class="role-title" style="color: #ffe066;">Вано</div>
+                <p class="role-desc">Власть, уважение, личный трон и право казнить и миловать. По сути, вы выкупаете весь сервер.</p>
+            </div>
+            <div class="role-footer">
+                <div class="price">99 999 999 <span>₽</span></div>
+                <div class="select-indicator"></div>
+            </div>
+        </div>
+
+        <div class="role-card" onclick="selectRole(this, 'Человек высшей должности', '100 ₽')">
+            <div>
+                <div class="role-title" style="color: #23a55a;">Высшая должность</div>
+                <p class="role-desc">Доступ в элитные каналы, возможность мутить провинившихся и красивый цвет ника на сервере.</p>
+            </div>
+            <div class="role-footer">
+                <div class="price">100 <span>₽</span></div>
+                <div class="select-indicator"></div>
+            </div>
+        </div>
+
+        <div class="role-card" onclick="selectRole(this, 'Человек нижней должности', '40 ₽')">
+            <div>
+                <div class="role-title" style="color: #3498db;">Нижняя должность</div>
+                <p class="role-desc">Уже не обычный смертный. Позволяет кидать гифки и заходить в закрытую текстовую флудилку.</p>
+            </div>
+            <div class="role-footer">
+                <div class="price">40 <span>₽</span></div>
+                <div class="select-indicator"></div>
+            </div>
+        </div>
+
+        <div class="role-card" onclick="selectRole(this, 'Боты', '10 ₽')">
+            <div>
+                <div class="role-title" style="color: #9b59b6;">Боты</div>
+                <p class="role-desc">Особая роль для тех, кто хочет притвориться искусственным интеллектом или любит автоматизацию.</p>
+            </div>
+            <div class="role-footer">
+                <div class="price">10 <span>₽</span></div>
+                <div class="select-indicator"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="checkout-panel" id="checkoutPanel">
+        <div class="checkout-title" id="checkoutTitle">Оплата роли</div>
+        <form id="paymentForm" onsubmit="handlePayment(event)">
+            <div class="form-group">
+                <label>Способ оплаты</label>
+                <div class="payment-methods">
+                    <div class="payment-option active">
+                        <div class="payment-option-left">
+                            <span class="payment-option-icon">💸</span>
+                            <span class="payment-option-name">DonateAlerts</span>
+                        </div>
+                        <span class="payment-badge active">Доступно</span>
+                    </div>
+
+                    <div class="payment-option disabled">
+                        <div class="payment-option-left">
+                            <span class="payment-option-icon">📲</span>
+                            <span class="payment-option-name">СБП</span>
+                        </div>
+                        <span class="payment-badge disabled">Недоступно</span>
+                    </div>
+
+                    <div class="payment-option disabled">
+                        <div class="payment-option-left">
+                            <span class="payment-option-icon">💳</span>
+                            <span class="payment-option-name">По номеру карты</span>
+                        </div>
+                        <span class="payment-badge disabled">Недоступно</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span id="submitBtnText">Оплатить</span>
+                <img src="https://noikcloud.xyz/pJd1x4E" alt="gif" class="btn-gif">
+            </button>
+        </form>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <img src="https://noikcloud.xyz/mPtPpsa" alt="Error animation" class="modal-gif">
+            <div class="modal-text">оплата пока что не работает и не будет работать</div>
+            <button class="close-btn" onclick="closeModal()">Понятно :(</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedRoleName = '';
+
+        function selectRole(element, name, price) {
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            selectedRoleName = name;
+
+            const panel = document.getElementById('checkoutPanel');
+            const title = document.getElementById('checkoutTitle');
+            const btnText = document.getElementById('submitBtnText');
+            
+            title.innerText = `Оплата роли: ${name}`;
+            btnText.innerText = `Купить за ${price}`;
+            
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function handlePayment(event) {
+            event.preventDefault();
+            window.open('https://dalink.to/kekeployd', '_blank');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        const dots = [];
+        const maxDots = 15;
+
+        for (let i = 0; i < maxDots; i++) {
+            const div = document.createElement('div');
+            div.className = 'trail';
+            const ratio = (maxDots - i) / maxDots;
+            div.style.opacity = ratio * 0.7; 
+            div.style.width = `${8 * ratio}px`;
+            div.style.height = `${8 * ratio}px`;
+            document.body.appendChild(div);
+            dots.push({ el: div, x: 0, y: 0 });
+        }
+
+        let mouseX = 0;
+        let mouseY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animate() {
+            let x = mouseX;
+            let y = mouseY;
+            
+            dots.forEach((dot, index) => {
+                const nextDot = dots[index + 1] || { x: mouseX, y: mouseY };
+                
+                dot.x += (nextDot.x - dot.x) * 0.55;
+                dot.y += (nextDot.y - dot.y) * 0.55;
+                
+                dot.el.style.left = `${dot.x}px`;
+                dot.el.style.top = `${dot.y}px`;
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>
